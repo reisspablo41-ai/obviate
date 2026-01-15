@@ -1,0 +1,35 @@
+Document 1: Product Requirements Document (PRD)
+1. Project Goal
+To create a secure, middle-man platform that holds funds (Bank or Crypto) until both parties in a transaction are satisfied with the delivery of goods or services.
+2. User Roles
+* Initiator (Sender): The user who starts the deal and invites the second party.
+* Recipient (Receiver): The user who receives the invitation and performs the service/provides the product.
+* Admin: A backend role to resolve disputes.
+3. Core Functional Requirements
+A. The Invitation System ("Obviate Link")
+* User enters an email address to invite a counterparty.
+* The system generates a unique, signed URL.
+* If the recipient doesn't have an account, the link directs them to a "claim account" page.
+* Upon signup, the deal is automatically linked to their new profile.
+B. The Escrow Lifecycle
+The platform must track the following states:
+1. Draft: Deal created but invite not accepted.
+2. Active: Both parties have joined.
+3. Funding: Waiting for the Initiator to deposit funds.
+4. Funded: Funds are confirmed (via Bank receipt or Blockchain tx).
+5. In Review: Recipient marks the task as complete.
+6. Completed: Initiator releases funds; platform takes a fee.
+7. Disputed: Either party freezes the transaction for Admin review.
+C. Payment Methods
+* Bank Transfer: Manual upload of transfer receipts or automated via Plaid/Stripe.
+* Crypto: Support for stablecoins (USDC/USDT) to avoid volatility during the escrow period.
+4. High-Level Feature List
+* Dashboard: View active, pending, and completed deals.
+* Deal Room: A private page for each escrow with a status stepper and a simple chat/activity log.
+* Wallet/Payout: A section for users to add their withdrawal bank details or wallet addresses.
+
+Document 2: Technical Specification (Brief)
+* Frontend: Next.js 14+ (App Router), Shadcn UI components for high-quality forms and modals.
+* Auth: Supabase Auth (Email/Password + Magic Links).
+* Database: Supabase (PostgreSQL) with Realtime enabled for the Deal Room chat.
+* Storage: Supabase Storage for storing bank transfer receipts and KYC documents.
