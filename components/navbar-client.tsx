@@ -56,7 +56,7 @@ export function NavbarClient({ user, initials }: NavbarClientProps) {
                         <div className="bg-primary p-1.5 rounded-lg">
                             <DollarSign className="h-5 w-5 text-white" />
                         </div>
-                        <span>Obviate</span>
+                        <span>Obviater</span>
                     </Link>
                 </div>
 

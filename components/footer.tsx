@@ -11,7 +11,7 @@ export function Footer() {
                             <div className="bg-primary p-1.5 rounded-lg">
                                 <DollarSign className="h-5 w-5 text-white" />
                             </div>
-                            <span>Obviate</span>
+                            <span>Obviater</span>
                         </Link>
                         <p className="max-w-xs text-sm text-zinc-500 leading-relaxed">
                             Making digital and real-world transactions safer through secure, modern escrow technology.
@@ -75,7 +75,7 @@ export function Footer() {
                                 <h3 className="text-sm font-semibold text-zinc-900">Support</h3>
                                 <ul role="list" className="mt-4 space-y-4">
                                     <li>
-                                        <Link href="mailto:support@obviate.com" className="text-sm text-zinc-500 hover:text-primary transition-colors">Contact Support</Link>
+                                        <Link href="mailto:support@obviater.com" className="text-sm text-zinc-500 hover:text-primary transition-colors">Contact Support</Link>
                                     </li>
                                     <li>
                                         <Link href="#" className="text-sm text-zinc-500 hover:text-primary transition-colors">Dispute Resolution</Link>
@@ -87,7 +87,7 @@ export function Footer() {
                 </div>
                 <div className="mt-12 border-t pt-8">
                     <p className="text-xs text-zinc-400">
-                        &copy; {new Date().getFullYear()} Obviate Technologies Inc. All rights reserved. Obviate is a technology platform, not a bank.
+                        &copy; {new Date().getFullYear()} Obviater Technologies Inc. All rights reserved. Obviater is a technology platform, not a bank.
                     </p>
                 </div>
             </div>

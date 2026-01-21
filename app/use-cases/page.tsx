@@ -22,7 +22,7 @@ export default function UseCases() {
         },
         {
             title: "Digital Assets & Domains",
-            desc: "Buying a high-value domain or a social media handle? Obviate holds the money while the ownership transfer is verified.",
+            desc: "Buying a high-value domain or a social media handle? Obviater holds the money while the ownership transfer is verified.",
             icon: Lightbulb,
             color: "bg-amber-100 text-amber-600",
             stats: "$1B+ Market Cap"
@@ -67,7 +67,7 @@ export default function UseCases() {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                         <h1 className="text-4xl md:text-6xl font-black mb-6 italic">Built for the Modern Economy</h1>
                         <p className="text-xl text-zinc-500 max-w-2xl italic leading-relaxed">
-                            Obviate is flexible enough to handle any transaction where trust is required. See how leaders across industries use our platform.
+                            Obviater is flexible enough to handle any transaction where trust is required. See how leaders across industries use our platform.
                         </p>
                     </div>
                     {/* Background decoration */}
@@ -113,7 +113,7 @@ export default function UseCases() {
                             <div>
                                 <h2 className="text-3xl md:text-5xl font-black mb-8 italic">Trust has no borders.</h2>
                                 <p className="text-lg text-emerald-100 italic mb-8 italic">
-                                    "We used Obviate to hire a development team in Vietnam for a $50k project. The ability to fund in USDC and release on milestones saved us from a logistical nightmare and thousands in bank fees."
+                                    "We used Obviater to hire a development team in Vietnam for a $50k project. The ability to fund in USDC and release on milestones saved us from a logistical nightmare and thousands in bank fees."
                                 </p>
                                 <div className="flex items-center gap-4">
                                     <div className="h-12 w-12 rounded-full bg-accent text-primary flex items-center justify-center font-black">

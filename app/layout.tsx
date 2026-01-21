@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Obviate | Secure Escrow for Everyone",
+  title: "Obviater | Secure Escrow for Everyone",
   description: "Secure, middle-man platform that holds funds until both parties are satisfied. Supporting Bank & Crypto transfers.",
   icons: {
     icon: "/favicon.ico",

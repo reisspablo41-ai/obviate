@@ -74,7 +74,7 @@ export default function Pricing() {
                         </div>
 
                         <p className="mt-8 text-center text-zinc-400 text-sm italic">
-                            * Minimum transaction amount: $50 USD. For high-volume enterprise deals ($100k+), <Link href="mailto:sales@obviate.com" className="text-primary font-bold hover:underline">contact sales</Link>.
+                            * Minimum transaction amount: $50 USD. For high-volume enterprise deals ($100k+), <Link href="mailto:sales@obviater.com" className="text-primary font-bold hover:underline">contact sales</Link>.
                         </p>
                     </div>
                 </section>
@@ -117,7 +117,7 @@ export default function Pricing() {
                                         <span className="font-bold">$1,000.00</span>
                                     </div>
                                     <div className="flex justify-between border-b pb-2">
-                                        <span className="text-zinc-500 italic">Obviate Fee (5%)</span>
+                                        <span className="text-zinc-500 italic">Obviater Fee (5%)</span>
                                         <span className="font-bold text-zinc-900">$50.00</span>
                                     </div>
                                     <div className="flex justify-between font-bold text-primary pt-2">
@@ -143,7 +143,7 @@ export default function Pricing() {
                                         <span className="font-bold">$1,000.00</span>
                                     </div>
                                     <div className="flex justify-between border-b pb-2">
-                                        <span className="text-zinc-500 italic">Obviate Fee (5%)</span>
+                                        <span className="text-zinc-500 italic">Obviater Fee (5%)</span>
                                         <span className="font-bold text-zinc-900">$50.00</span>
                                     </div>
                                     <div className="flex justify-between font-bold text-primary pt-2">

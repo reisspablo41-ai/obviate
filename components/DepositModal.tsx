@@ -19,7 +19,7 @@ type DepositMethod = 'bank' | 'crypto';
 // Platform bank account details (placeholder)
 const PLATFORM_BANK_DETAILS = {
     bankName: 'Chase Bank',
-    accountName: 'Obviate Escrow Holdings LLC',
+    accountName: 'Obviater Escrow Holdings LLC',
     accountNumber: '9876543210',
     routingNumber: '021000021',
     swiftCode: 'CHASUS33',
@@ -500,8 +500,8 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
                                                     key={network.id}
                                                     onClick={() => setSelectedNetwork(network.id)}
                                                     className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedNetwork === network.id
-                                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
                                                         }`}
                                                 >
                                                     {network.name}

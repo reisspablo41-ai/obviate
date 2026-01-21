@@ -166,11 +166,11 @@ export default async function Home() {
                 <div className="bg-white p-10 rounded-[2.5rem] border shadow-xl relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold mb-6">
                     <CheckCircle2 className="h-4 w-4" />
-                    The Obviate Standard
+                    The Obviater Standard
                   </div>
                   <h3 className="text-3xl font-black mb-6 italic">Total Protection.</h3>
                   <p className="text-zinc-600 mb-8 leading-relaxed">
-                    Obviate eliminates risk by holding funds in a secure neutral vault.
+                    Obviater eliminates risk by holding funds in a secure neutral vault.
                     The seller knows the money is there. The buyer knows it won't move until they say so.
                   </p>
                   <Link href="/signup" className="text-primary font-bold hover:underline flex items-center gap-2">
@@ -217,12 +217,12 @@ export default async function Home() {
         {/* 4. COMPARISON TABLE */}
         <section className="py-24 bg-zinc-900 text-white">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center mb-16 italic">Why Obviate beats direct transfers</h2>
+            <h2 className="text-3xl font-bold text-center mb-16 italic">Why Obviater beats direct transfers</h2>
             <div className="bg-zinc-800/50 rounded-3xl border border-zinc-700 overflow-hidden">
               <div className="grid grid-cols-3 bg-zinc-800 p-6 border-b border-zinc-700 font-bold text-lg">
                 <div className="text-zinc-400">Feature</div>
                 <div className="text-center text-zinc-400">Direct Wire</div>
-                <div className="text-center text-primary">Obviate Escrow</div>
+                <div className="text-center text-primary">Obviater Escrow</div>
               </div>
               {[
                 { feat: "Payment Protection", bad: "None", good: "100% Secured" },
@@ -396,7 +396,7 @@ export default async function Home() {
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
-                  quote: "Obviate saved me from a $15k scam. The dispute team was incredibly professional.",
+                  quote: "Obviater saved me from a $15k scam. The dispute team was incredibly professional.",
                   author: "Sarah J.",
                   role: "Digital Artist"
                 },
@@ -451,10 +451,10 @@ export default async function Home() {
               <div className="relative z-10">
                 <h2 className="text-3xl md:text-5xl font-black mb-6 italic">Start a deal with just an email.</h2>
                 <p className="text-xl text-emerald-100 mb-10 max-w-2xl mx-auto italic">
-                  No account needed for your client to view the deal. Send them an Obviate Link and they can sign up to accept in seconds.
+                  No account needed for your client to view the deal. Send them an Obviater Link and they can sign up to accept in seconds.
                 </p>
                 <div className="inline-flex bg-white/10 p-2 rounded-xl border border-white/20 backdrop-blur-md mb-8">
-                  <code className="text-white font-mono px-4">obviate.com/deal/88a9-f00d-22x1</code>
+                  <code className="text-white font-mono px-4">obviater.com/deal/88a9-f00d-22x1</code>
                 </div>
                 <div>
                   <Link href="/signup" className="inline-flex h-14 items-center justify-center rounded-xl bg-white text-primary font-bold px-8 shadow-lg hover:bg-zinc-50 transition-colors">
@@ -510,7 +510,7 @@ export default async function Home() {
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-5xl md:text-7xl font-black mb-8 italic text-zinc-900">Ready to deal?</h2>
             <p className="text-2xl text-zinc-500 mb-12 italic max-w-2xl mx-auto">
-              Join thousands of freelancers, agencies, and traders who entrust their payments to Obviate.
+              Join thousands of freelancers, agencies, and traders who entrust their payments to Obviater.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link

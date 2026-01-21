@@ -28,14 +28,14 @@ export default function AMLKYC() {
                         <section>
                             <h2 className="text-xl font-bold text-zinc-900 mb-4 not-italic">1. Our Commitment</h2>
                             <p>
-                                Obviate is committed to maintaining the highest standards of Anti-Money Laundering (AML) and Counter-Terrorist Financing (CTF) compliance. We operate in alignment with FATF recommendations and local financial regulations.
+                                Obviater is committed to maintaining the highest standards of Anti-Money Laundering (AML) and Counter-Terrorist Financing (CTF) compliance. We operate in alignment with FATF recommendations and local financial regulations.
                             </p>
                         </section>
 
                         <section>
                             <h2 className="text-xl font-bold text-zinc-900 mb-4 not-italic">2. Know Your Customer (KYC)</h2>
                             <p>
-                                To use Obviate for high-value transactions, all users must complete identity verification. This includes providing:
+                                To use Obviater for high-value transactions, all users must complete identity verification. This includes providing:
                                 <ul className="list-disc pl-5 mt-2 space-y-1">
                                     <li>Valid government-issued photo identification.</li>
                                     <li>Proof of residential address where required.</li>
@@ -54,14 +54,14 @@ export default function AMLKYC() {
                         <section>
                             <h2 className="text-xl font-bold text-zinc-900 mb-4 not-italic">4. Sanction Screening</h2>
                             <p>
-                                Obviate does not facilitate transactions involving individuals, entities, or jurisdictions listed on global sanctions watchlists (e.g., OFAC, UN, EU).
+                                Obviater does not facilitate transactions involving individuals, entities, or jurisdictions listed on global sanctions watchlists (e.g., OFAC, UN, EU).
                             </p>
                         </section>
 
                         <section className="bg-zinc-50 p-6 rounded-2xl border border-dashed">
                             <h2 className="text-lg font-bold text-zinc-900 mb-2 not-italic">Questions regarding compliance?</h2>
                             <p className="text-sm italic">
-                                Our compliance officer can be reached at <span className="font-bold text-primary">compliance@obviate.com</span> for any inquiries regarding our regulatory stance.
+                                Our compliance officer can be reached at <span className="font-bold text-primary">compliance@obviater.com</span> for any inquiries regarding our regulatory stance.
                             </p>
                         </section>
                     </div>

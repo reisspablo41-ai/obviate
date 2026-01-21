@@ -11,12 +11,12 @@ import Link from "next/link";
 export default function FAQ() {
     const faqs = [
         {
-            q: "Is my money safe with Obviate?",
-            a: "Absolutely. Obviate holds funds in regulated trust accounts or secure, audited smart contracts (for crypto). Funds are strictly isolated from our corporate accounts and cannot be moved without the proper conditions being met in the deal lifecycle."
+            q: "Is my money safe with Obviater?",
+            a: "Absolutely. Obviater holds funds in regulated trust accounts or secure, audited smart contracts (for crypto). Funds are strictly isolated from our corporate accounts and cannot be moved without the proper conditions being met in the deal lifecycle."
         },
         {
             q: "What happens if there's a dispute?",
-            a: "If either party is unhappy, they can 'Freeze' the deal. An Obviate administrator will then contact both parties to collect evidence. We act as a neutral third party to ensure the final distribution of funds follows the original agreement terms."
+            a: "If either party is unhappy, they can 'Freeze' the deal. An Obviater administrator will then contact both parties to collect evidence. We act as a neutral third party to ensure the final distribution of funds follows the original agreement terms."
         },
         {
             q: "How long does the escrow process take?",
@@ -96,7 +96,7 @@ export default function FAQ() {
                                     </div>
                                     <div className="text-left">
                                         <p className="text-sm font-black text-zinc-900 uppercase tracking-widest">Email Support</p>
-                                        <p className="text-sm text-zinc-500 italic">support@obviate.com</p>
+                                        <p className="text-sm text-zinc-500 italic">support@obviater.com</p>
                                     </div>
                                 </div>
                                 <div className="h-8 w-px bg-zinc-200 hidden sm:block" />

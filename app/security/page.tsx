@@ -112,7 +112,7 @@ export default function Security() {
                                     <div className="p-6 bg-zinc-50 rounded-2xl border border-dashed border-amber-200">
                                         <h5 className="font-bold text-amber-800 mb-2 italic">Non-Automatic Release</h5>
                                         <p className="text-sm text-zinc-500 italic">
-                                            Unlike some platforms that force-release funds after a timer, Obviate prioritizes human review for high-value disputes to ensure justice is served.
+                                            Unlike some platforms that force-release funds after a timer, Obviater prioritizes human review for high-value disputes to ensure justice is served.
                                         </p>
                                     </div>
                                 </div>
@@ -126,7 +126,7 @@ export default function Security() {
                                         Infrastructure
                                     </h2>
                                     <p className="text-zinc-600 leading-relaxed italic mb-8">
-                                        Obviate runs on a highly available, multi-region cloud architecture. Our databases are SOC 2 Type II compliant and regularly audited.
+                                        Obviater runs on a highly available, multi-region cloud architecture. Our databases are SOC 2 Type II compliant and regularly audited.
                                     </p>
                                     <div className="grid grid-cols-2 gap-6">
                                         <div className="p-4 bg-zinc-50 rounded-xl">
@@ -146,7 +146,7 @@ export default function Security() {
                                         <div className="h-3 w-3 rounded-full bg-emerald-500" />
                                     </div>
                                     <pre className="text-[10px] md:text-xs font-mono text-emerald-400 opacity-80 overflow-hidden leading-relaxed">
-                                        {`# OBVIATE SECURITY LOGS
+                                        {`# OBVIATER SECURITY LOGS
 [INFO] 14:02:11 - New Escrow Vault Created: #VAULT-772
 [INFO] 14:02:11 - Multi-sig Verification: APPROVED
 [WARN] 14:05:32 - IP Login Mismatch: #USR-99
@@ -169,7 +169,7 @@ export default function Security() {
                         <p className="text-xl text-zinc-400 max-w-2xl mx-auto italic mb-8">
                             We value the security community. If you find a vulnerability in our platform, we offer competitive bounties.
                         </p>
-                        <a href="mailto:security@obviate.com" className="inline-flex h-12 items-center justify-center rounded-xl bg-white/10 px-8 text-sm font-bold text-white transition-all hover:bg-white/20 border border-white/10">
+                        <a href="mailto:security@obviater.com" className="inline-flex h-12 items-center justify-center rounded-xl bg-white/10 px-8 text-sm font-bold text-white transition-all hover:bg-white/20 border border-white/10">
                             Report a Vulnerability
                         </a>
                     </div>

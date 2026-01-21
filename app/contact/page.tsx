@@ -35,8 +35,8 @@ export default function Contact() {
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">Email Support</h3>
                                             <p className="text-zinc-500 mb-2">For general inquiries and dispute resolution.</p>
-                                            <a href="mailto:support@obviate.com" className="text-primary font-medium hover:underline">
-                                                support@obviate.com
+                                            <a href="mailto:support@obviater.com" className="text-primary font-medium hover:underline">
+                                                support@obviater.com
                                             </a>
                                         </div>
                                     </div>
@@ -75,8 +75,8 @@ export default function Contact() {
                                     <p className="text-sm text-zinc-500 mb-4">
                                         For media inquiries, please contact our PR team directly.
                                     </p>
-                                    <a href="mailto:press@obviate.com" className="text-sm font-bold text-zinc-900 hover:text-primary transition-colors">
-                                        press@obviate.com &rarr;
+                                    <a href="mailto:press@obviater.com" className="text-sm font-bold text-zinc-900 hover:text-primary transition-colors">
+                                        press@obviater.com &rarr;
                                     </a>
                                 </div>
                             </div>

@@ -20,7 +20,7 @@ export default function HowItWorks() {
                 {/* Header */}
                 <section className="bg-primary pt-20 pb-32 text-white relative overflow-hidden">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                        <h1 className="text-4xl md:text-6xl font-black mb-6 italic">How Obviate Works</h1>
+                        <h1 className="text-4xl md:text-6xl font-black mb-6 italic">How Obviater Works</h1>
                         <p className="text-xl text-emerald-100 max-w-2xl mx-auto italic">
                             From the first invitation to the final fund release, we ensure every step of your transaction is transparent and protected.
                         </p>
@@ -34,8 +34,8 @@ export default function HowItWorks() {
                         <div className="space-y-12">
                             {[
                                 {
-                                    title: "1. The Invitation (Obviate Link)",
-                                    desc: "The deal Initiator enters the recipient's email and transaction details. Our system generates a unique, signed URL known as an 'Obviate Link'. This link is the source of truth for the entire deal.",
+                                    title: "1. The Invitation (Obviater Link)",
+                                    desc: "The deal Initiator enters the recipient's email and transaction details. Our system generates a unique, signed URL known as an 'Obviater Link'. This link is the source of truth for the entire deal.",
                                     icon: LinkIcon,
                                     color: "bg-blue-500",
                                     image: "https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&q=80&w=800"
@@ -56,7 +56,7 @@ export default function HowItWorks() {
                                 },
                                 {
                                     title: "4. Verification & Release",
-                                    desc: "The Recipient delivers the work or product. Once the Initiator reviews and approves, they trigger the release. Obviate handles the payout instantly, minus our transparent platform fee.",
+                                    desc: "The Recipient delivers the work or product. Once the Initiator reviews and approves, they trigger the release. Obviater handles the payout instantly, minus our transparent platform fee.",
                                     icon: Unlock,
                                     color: "bg-purple-500",
                                     image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=800"
@@ -90,7 +90,7 @@ export default function HowItWorks() {
                             <div>
                                 <h2 className="text-3xl font-black mb-6 italic">Behind the scenes</h2>
                                 <p className="text-zinc-400 mb-8 leading-relaxed italic">
-                                    We don't just move numbers around in a database. Obviate leverages smart contracts and banking APIs to ensure true asset isolation.
+                                    We don't just move numbers around in a database. Obviater leverages smart contracts and banking APIs to ensure true asset isolation.
                                 </p>
                                 <div className="space-y-6">
                                     {[
@@ -139,7 +139,7 @@ export default function HowItWorks() {
                                     <ul className="space-y-4">
                                         {[
                                             "Funds are locked and cannot be withdrawn.",
-                                            "An Obviate Admin is assigned to the case.",
+                                            "An Obviater Admin is assigned to the case.",
                                             "Both parties provide evidence (chat logs, files).",
                                             "A final resolution is reached within 72 hours."
                                         ].map((text, i) => (

@@ -110,7 +110,7 @@ export async function createDealAction(prevState: DealFormState, formData: FormD
             const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/claim-invite?token=${token}`
 
             await resend.emails.send({
-                from: 'Obviate Escrow <onboarding@resend.dev>',
+                from: 'Obviater <support@obviater.com>',
                 to: counterpartyEmail,
                 subject: `You've been invited to a secure deal: "${title}"`,
                 html: `
@@ -126,7 +126,7 @@ export async function createDealAction(prevState: DealFormState, formData: FormD
         
         <!-- Header -->
         <div style="background-color: #2e7d32; padding: 32px 24px; text-align: center;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">Obviate Escrow</h1>
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">Obviater</h1>
         </div>
 
         <!-- Content -->
@@ -165,7 +165,7 @@ export async function createDealAction(prevState: DealFormState, formData: FormD
         <!-- Footer -->
         <div style="background-color: #18181b; padding: 24px; text-align: center;">
             <p style="margin: 0; font-size: 12px; color: #71717a;">
-                &copy; ${new Date().getFullYear()} Obviate Escrow. All rights reserved.
+                &copy; ${new Date().getFullYear()} Obviater. All rights reserved.
             </p>
             <p style="margin: 8px 0 0; font-size: 12px; color: #52525b;">
                 Secure payments provided by <span style="color: #a1a1aa;">Coinbase Commerce</span> & Bank Transfers.

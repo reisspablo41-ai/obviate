@@ -33,7 +33,7 @@ export default function SupportPage() {
                                 <Mail className="w-5 h-5 text-emerald-600 mt-1" />
                                 <div>
                                     <p className="text-sm font-medium text-gray-900">Email</p>
-                                    <p className="text-sm text-gray-500">support@obviate.com</p>
+                                    <p className="text-sm text-gray-500">support@obviater.com</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
