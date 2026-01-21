@@ -1,12 +1,33 @@
 import React from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, AlertTriangle, FileText, LogOut, Users, ShieldCheck, Mail } from 'lucide-react';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        redirect('/login');
+    }
+
+    // Check if user is admin
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.is_admin) {
+        redirect('/'); // Or a 403 page
+    }
+
     return (
         <div className="flex h-screen bg-gray-100 text-gray-900 font-sans">
             {/* Sidebar - Dark for Admin */}

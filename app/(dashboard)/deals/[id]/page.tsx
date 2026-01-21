@@ -3,7 +3,7 @@ import { useState, use, useEffect } from 'react';
 import {
     CheckCircle,
     Clock,
-    MessageSquare,
+
     ShieldCheck,
     DollarSign,
     AlertTriangle,
@@ -11,6 +11,10 @@ import {
 } from 'lucide-react';
 import DepositModal from '@/components/DepositModal';
 import { createClient } from '@/utils/supabase/client';
+import { confirmDelivery, confirmReceipt } from '@/actions/deal-workflow';
+import { useRouter } from 'next/navigation';
+import ChatComponent from '@/components/deal/ChatComponent';
+import DisputeModal from '@/components/deal/DisputeModal';
 
 interface Deal {
     id: string;
@@ -22,38 +26,43 @@ interface Deal {
     initiator_id: string;
     recipient_id: string | null;
     created_at: string;
+    seller_confirmed_delivered?: boolean;
+    buyer_confirmed_received?: boolean;
 }
 
 export default function DealRoomPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+    const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
     const [deal, setDeal] = useState<Deal | null>(null);
     const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const router = useRouter();
 
-    useEffect(() => {
-        async function fetchDeal() {
-            const supabase = createClient();
+    const fetchDeal = async () => {
+        const supabase = createClient();
 
-            // Get current user
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                setCurrentUserId(user.id);
-            }
-
-            // Fetch deal data
-            const { data, error } = await supabase
-                .from('deals')
-                .select('*')
-                .eq('id', resolvedParams.id)
-                .single();
-
-            if (data) {
-                setDeal(data as Deal);
-            }
-            setLoading(false);
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            setCurrentUserId(user.id);
         }
 
+        // Fetch deal data
+        const { data, error } = await supabase
+            .from('deals')
+            .select('*')
+            .eq('id', resolvedParams.id)
+            .single();
+
+        if (data) {
+            setDeal(data as Deal);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
         fetchDeal();
     }, [resolvedParams.id]);
 
@@ -74,6 +83,46 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
             </div>
         );
     }
+
+    const handleConfirmDelivery = async () => {
+        if (!deal) return;
+        setActionLoading(true);
+        try {
+            const result = await confirmDelivery(deal.id);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                fetchDeal(); // Re-fetch to get latest status (including completion)
+                router.refresh();
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleConfirmReceipt = async () => {
+        if (!deal) return;
+        setActionLoading(true);
+        try {
+            const result = await confirmReceipt(deal.id);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                setDeal(prev => prev ? { ...prev, buyer_confirmed_received: true } : null);
+                router.refresh();
+                if (deal.seller_confirmed_delivered) {
+                    // If other party verified, status will change on backend, locally update to complete to show immediate feedback
+                    setDeal(prev => prev ? { ...prev, status: 'completed' } : null);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     if (!deal) {
         return (
@@ -96,7 +145,7 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                 if (currentIndex >= 3) return 'completed'; // funded or later
                 return currentIndex >= 1 ? 'active' : 'pending';
             case 'work':
-                if (currentIndex >= 4) return 'active'; // in_review
+                if (deal.status === 'funded') return 'active'; // Funded means work in progress
                 if (currentIndex >= 5) return 'completed'; // completed
                 return 'pending';
             case 'completed':
@@ -115,10 +164,10 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide ${deal.status === 'funding' ? 'bg-amber-100 text-amber-800' :
-                                deal.status === 'funded' ? 'bg-emerald-100 text-emerald-800' :
-                                    deal.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                        deal.status === 'disputed' ? 'bg-red-100 text-red-800' :
-                                            'bg-blue-100 text-blue-800'
+                            deal.status === 'funded' ? 'bg-emerald-100 text-emerald-800' :
+                                deal.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                    deal.status === 'disputed' ? 'bg-red-100 text-red-800' :
+                                        'bg-blue-100 text-blue-800'
                             }`}>
                             {deal.status === 'funding' ? 'Verifying Payment' : deal.status}
                         </span>
@@ -164,12 +213,12 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                                 {/* Step 2: Funding */}
                                 <div className="flex gap-4">
                                     <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${fundingStepState === 'completed'
-                                            ? 'bg-emerald-100 text-emerald-600'
-                                            : fundingStepState === 'verifying'
-                                                ? 'bg-amber-100 text-amber-600 ring-2 ring-amber-50'
-                                                : fundingStepState === 'active'
-                                                    ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-50'
-                                                    : 'bg-gray-100 text-gray-400'
+                                        ? 'bg-emerald-100 text-emerald-600'
+                                        : fundingStepState === 'verifying'
+                                            ? 'bg-amber-100 text-amber-600 ring-2 ring-amber-50'
+                                            : fundingStepState === 'active'
+                                                ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-50'
+                                                : 'bg-gray-100 text-gray-400'
                                         }`}>
                                         {fundingStepState === 'completed' ? (
                                             <CheckCircle className="w-5 h-5" />
@@ -221,8 +270,8 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                                 {/* Step 3: Work */}
                                 <div className={`flex gap-4 ${getStepState('work') === 'pending' ? 'opacity-50' : ''}`}>
                                     <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${getStepState('work') === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                                            getStepState('work') === 'active' ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-50' :
-                                                'bg-gray-100 text-gray-400'
+                                        getStepState('work') === 'active' ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-50' :
+                                            'bg-gray-100 text-gray-400'
                                         }`}>
                                         {getStepState('work') === 'completed' ? (
                                             <CheckCircle className="w-5 h-5" />
@@ -232,7 +281,60 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                                     </div>
                                     <div>
                                         <p className="font-medium text-gray-900">Work in Progress</p>
-                                        <p className="text-sm text-gray-500">Seller provides goods or services.</p>
+                                        <p className="text-sm text-gray-500 mb-2">Seller provides goods or services.</p>
+
+                                        {/* Status Spinner for Work in Progress */}
+                                        {getStepState('work') === 'active' && (
+                                            <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-3 py-2 rounded-lg mb-3">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span className="text-sm font-medium">Order is in progress</span>
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        {getStepState('work') === 'active' && userRole === 'seller' && (
+                                            <div className="mt-2">
+                                                {!deal.seller_confirmed_delivered ? (
+                                                    <button
+                                                        onClick={handleConfirmDelivery}
+                                                        disabled={actionLoading}
+                                                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                                    >
+                                                        {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                        Confirm Shipped/Delivered
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                        <span className="text-sm font-medium">You verified delivery. Waiting for buyer.</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {getStepState('work') === 'active' && userRole === 'buyer' && (
+                                            <div className="mt-2">
+                                                {!deal.buyer_confirmed_received ? (
+                                                    <button
+                                                        onClick={handleConfirmReceipt}
+                                                        disabled={actionLoading}
+                                                        className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                                    >
+                                                        {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                        Confirm Received
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                        <span className="text-sm font-medium">You verified receipt. Waiting for seller.</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {getStepState('work') === 'active' && !userRole && (
+                                            <p className="text-sm text-gray-500 italic mt-2">Waiting for parties to confirm completion.</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -251,41 +353,11 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                         </div>
                     </div>
 
+
                     {/* Activity / Chat */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px] flex flex-col">
-                        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <MessageSquare className="w-5 h-5 text-gray-500" />
-                            Activity & Messages
-                        </h3>
-
-                        <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 rounded-lg mb-4">
-                            <div className="text-center text-xs text-gray-400 my-2">-- Today --</div>
-
-                            <div className="flex justify-end">
-                                <div className="bg-emerald-100 text-emerald-900 px-4 py-2 rounded-lg rounded-tr-none max-w-[80%] text-sm">
-                                    <p>I've created the milestone for the homepage design.</p>
-                                    <span className="text-xs opacity-70 mt-1 block">10:42 AM</span>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-center my-4">
-                                <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
-                                    Deal created by You
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="Type a message..."
-                                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            />
-                            <button className="px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                                Send
-                            </button>
-                        </div>
-                    </div>
+                    {currentUserId && (
+                        <ChatComponent dealId={deal.id} currentUserId={currentUserId} />
+                    )}
                 </div>
 
                 {/* Right Column: Details */}
@@ -320,7 +392,10 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                         <p className="text-sm text-gray-600 mb-4">
                             If you have an issue with this transaction, you can open a dispute. This will freeze funds until an admin reviews the case.
                         </p>
-                        <button className="w-full px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-colors">
+                        <button
+                            onClick={() => setIsDisputeModalOpen(true)}
+                            className="w-full px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-colors"
+                        >
                             Open Dispute
                         </button>
                     </div>
@@ -333,6 +408,12 @@ export default function DealRoomPage({ params }: { params: Promise<{ id: string 
                 onClose={() => setIsDepositModalOpen(false)}
                 amount={deal.amount}
                 currency={deal.currency}
+                dealId={deal.id}
+            />
+
+            <DisputeModal
+                isOpen={isDisputeModalOpen}
+                onClose={() => setIsDisputeModalOpen(false)}
                 dealId={deal.id}
             />
         </div>

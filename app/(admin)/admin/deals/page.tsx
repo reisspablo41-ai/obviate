@@ -7,21 +7,75 @@ import DealActions from '@/components/admin/DealActions';
 export default async function AdminDealsPage() {
     const supabase = await createClient();
 
-    const { data: deals, error } = await supabase
-        .from('deals')
-        .select(`
-            *,
-            initiator:initiator_id(full_name),
-            recipient:recipient_id(full_name)
-        `)
-        .order('created_at', { ascending: false });
+    let deals: any[] = [];
+    let errorMsg = null;
+
+    try {
+        // 1. Fetch Deals only (no joins to prevent syntax errors)
+        const { data: rawDeals, error: queryError } = await supabase
+            .from('deals')
+            // Debugging: Explicitly selecting columns to find which one is breaking JSON.parse
+            // If this works, add more columns back until it breaks.
+            .select('id, title, amount, currency, status, created_at, initiator_id, recipient_id')
+            .order('created_at', { ascending: false });
+
+        if (queryError) {
+            console.error('Admin Deals Query Error:', queryError);
+            errorMsg = queryError.message;
+        } else {
+            // 2. Start manual join
+            const dealsData = rawDeals || [];
+
+            // Collect user IDs
+            const userIds = new Set<string>();
+            dealsData.forEach((d: any) => {
+                if (d.initiator_id) userIds.add(d.initiator_id);
+                if (d.recipient_id) userIds.add(d.recipient_id);
+            });
+
+            let profilesMap = new Map();
+            if (userIds.size > 0) {
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, full_name')
+                    .in('id', Array.from(userIds));
+
+                profiles?.forEach((p: any) => profilesMap.set(p.id, p));
+            }
+
+            // Merge
+            deals = dealsData.map((d: any) => ({
+                ...d,
+                initiator: profilesMap.get(d.initiator_id) || { full_name: 'Unknown' },
+                recipient: profilesMap.get(d.recipient_id) || { full_name: 'Pending' }
+            }));
+        }
+    } catch (e: any) {
+        console.error('Admin Deals Unexpected Error:', e);
+        errorMsg = e.message || 'An unexpected error occurred';
+    }
+
+    if (errorMsg) {
+        return (
+            <div className="p-8 text-center">
+                <div className="bg-red-50 text-red-600 p-4 rounded-lg inline-block text-left">
+                    <h3 className="font-bold">Error loading deals</h3>
+                    <p className="text-sm mt-1">{errorMsg}</p>
+                </div>
+            </div>
+        );
+    }
 
     // Debug logging
     console.log('--- ADMIN DEALS DEBUG ---');
     console.log('Deals fetched:', deals?.length || 0);
-    console.log('Error:', error);
-    if (deals && deals.length > 0) {
-        console.log('First deal:', JSON.stringify(deals[0], null, 2));
+    try {
+        if (deals && deals.length > 0) {
+            // Safely log to avoid crashing the logging itself
+            console.log('First deal:', JSON.stringify(deals[0], null, 2));
+        }
+    } catch (logError) {
+        console.error('Failed to log deals:', logError);
     }
 
     return (

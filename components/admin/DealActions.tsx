@@ -28,12 +28,24 @@ export default function DealActions({ dealId, dealStatus, dealTitle, paymentRece
             const supabase = createClient();
             const bucketName = process.env.NEXT_PUBLIC_ESCROW_STORAGE_BUCKET || 'escrow-storage';
 
-            const { data } = supabase.storage
-                .from(bucketName)
-                .getPublicUrl(paymentReceiptUrl);
+            // Debug: log the path being used
+            console.log('--- RECEIPT DEBUG ---');
+            console.log('Bucket name:', bucketName);
+            console.log('Receipt path from DB:', paymentReceiptUrl);
 
-            if (data?.publicUrl) {
-                setReceiptUrl(data.publicUrl);
+            // Use createSignedUrl for private buckets (expires in 1 hour)
+            const { data, error } = await supabase.storage
+                .from(bucketName)
+                .createSignedUrl(paymentReceiptUrl, 3600);
+
+            if (error) {
+                console.error('Failed to create signed URL:', error);
+                alert('Failed to load receipt: ' + error.message);
+                return;
+            }
+
+            if (data?.signedUrl) {
+                setReceiptUrl(data.signedUrl);
                 setShowReceiptModal(true);
             }
         } catch (error) {

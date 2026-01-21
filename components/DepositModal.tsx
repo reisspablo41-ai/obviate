@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Building, Bitcoin, Clock, Copy, Check, AlertCircle, QrCode, Upload, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
+import { X, Building, Bitcoin, Clock, Copy, Check, AlertCircle, QrCode, Upload, Image as ImageIcon, Trash2, Loader2, ExternalLink } from 'lucide-react';
 import { submitBankDeposit } from '@/actions/submit-deposit';
 import { createClient } from '@/utils/supabase/client';
+
 interface DepositModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -25,14 +26,16 @@ const PLATFORM_BANK_DETAILS = {
     reference: 'ESCROW-', // Will append deal ID
 };
 
-// Platform crypto wallet (placeholder - in production this would be generated per transaction via Coinbase Commerce)
-const PLATFORM_CRYPTO_DETAILS = {
-    network: 'Ethereum (ERC-20)',
-    coin: 'USDC',
-    address: '0x742d35Cc6634C0532925a3b844Bc9e7595f1A0b3',
-};
-
 const DEPOSIT_TIMEOUT_MINUTES = 10;
+
+interface CoinbaseCharge {
+    id: string;
+    code: string;
+    hostedUrl: string;
+    expiresAt: string;
+    addresses: Record<string, string>;
+    pricing: Record<string, { amount: string; currency: string }>;
+}
 
 export default function DepositModal({ isOpen, onClose, amount, currency, dealId, onDepositComplete }: DepositModalProps) {
     const router = useRouter();
@@ -45,6 +48,11 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Coinbase Commerce state
+    const [coinbaseCharge, setCoinbaseCharge] = useState<CoinbaseCharge | null>(null);
+    const [isCreatingCharge, setIsCreatingCharge] = useState(false);
+    const [selectedNetwork, setSelectedNetwork] = useState<string>('ethereum');
 
     // Calculate fee and total
     const fee = amount * 0.05;
@@ -85,6 +93,8 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
             setReceiptFile(null);
             setReceiptPreview(null);
             setIsSubmitting(false);
+            setCoinbaseCharge(null);
+            setIsCreatingCharge(false);
         }
     }, [isOpen]);
 
@@ -104,6 +114,7 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
         setTimerStarted(true);
         setReceiptFile(null);
         setReceiptPreview(null);
+        setCoinbaseCharge(null);
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,14 +189,55 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
         }
     };
 
+    // Create Coinbase Commerce charge
+    const handleCreateCryptoCharge = async () => {
+        setIsCreatingCharge(true);
+        try {
+            const response = await fetch('/api/coinbase/create-charge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dealId,
+                    amount,
+                    currency,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.error || 'Failed to create crypto payment');
+                return;
+            }
+
+            setCoinbaseCharge(data.charge);
+            setTimerStarted(true);
+        } catch (error) {
+            console.error('Failed to create charge:', error);
+            alert('Failed to create crypto payment. Please try again.');
+        } finally {
+            setIsCreatingCharge(false);
+        }
+    };
+
     // Calculate timer progress percentage
     const timerProgress = (timeRemaining / (DEPOSIT_TIMEOUT_MINUTES * 60)) * 100;
+
+    // Get available networks from charge
+    const getNetworkOptions = () => {
+        if (!coinbaseCharge?.addresses) return [];
+        return Object.entries(coinbaseCharge.addresses).map(([network, address]) => ({
+            id: network,
+            name: network.charAt(0).toUpperCase() + network.slice(1),
+            address,
+        }));
+    };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
                     <div>
@@ -407,62 +459,123 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {/* QR Code Placeholder */}
-                            <div className="flex justify-center">
-                                <div className="w-40 h-40 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                                    <div className="text-center">
-                                        <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                        <p className="text-xs text-gray-500">QR Code</p>
+                            {!coinbaseCharge ? (
+                                /* Initial Crypto State - Show payment button */
+                                <div className="text-center py-6">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Bitcoin className="w-10 h-10 text-indigo-600" />
                                     </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Pay with Cryptocurrency</h3>
+                                    <p className="text-sm text-gray-500 mb-6">
+                                        Send <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalAmount)}</strong> in USDC, ETH, or BTC
+                                    </p>
+                                    <button
+                                        onClick={handleCreateCryptoCharge}
+                                        disabled={isCreatingCharge}
+                                        className="w-full py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {isCreatingCharge ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                Creating Payment...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Bitcoin className="w-5 h-5" />
+                                                Generate Payment Address
+                                            </>
+                                        )}
+                                    </button>
+                                    <p className="text-xs text-gray-400 mt-3">Powered by Coinbase Commerce</p>
                                 </div>
-                            </div>
-
-                            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">Network</span>
-                                    <span className="text-sm font-medium text-gray-900">{PLATFORM_CRYPTO_DETAILS.network}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">Coin</span>
-                                    <span className="text-sm font-medium text-gray-900">{PLATFORM_CRYPTO_DETAILS.coin}</span>
-                                </div>
-                                <div className="pt-3 border-t border-gray-200">
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-sm text-gray-500">Wallet Address</span>
-                                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
-                                            <span className="text-xs font-medium text-gray-900 font-mono break-all flex-1">
-                                                {PLATFORM_CRYPTO_DETAILS.address}
-                                            </span>
-                                            <button
-                                                onClick={() => handleCopy(PLATFORM_CRYPTO_DETAILS.address, 'wallet')}
-                                                className="p-1.5 hover:bg-gray-100 rounded transition-colors shrink-0"
-                                            >
-                                                {copied === 'wallet' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                                            </button>
+                            ) : (
+                                /* Coinbase Charge Created - Show addresses */
+                                <>
+                                    {/* Network Selector */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">Select Network</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {getNetworkOptions().map((network) => (
+                                                <button
+                                                    key={network.id}
+                                                    onClick={() => setSelectedNetwork(network.id)}
+                                                    className={`p-3 rounded-lg border text-sm font-medium transition-all ${selectedNetwork === network.id
+                                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                                        }`}
+                                                >
+                                                    {network.name}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
-                                <p className="text-xs text-purple-700">
-                                    <strong>Coinbase Commerce:</strong> Send exactly <strong>{new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(totalAmount)} USDC</strong> to this address. Transactions are typically confirmed within 5 minutes.
-                                </p>
-                            </div>
+                                    {/* QR Code Placeholder */}
+                                    <div className="flex justify-center">
+                                        <div className="w-40 h-40 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                                            <div className="text-center">
+                                                <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                                                <p className="text-xs text-gray-500">QR Code</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Wallet Address */}
+                                    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                                        <div className="flex flex-col gap-2">
+                                            <span className="text-sm text-gray-500">Send to Address ({selectedNetwork})</span>
+                                            <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
+                                                <span className="text-xs font-medium text-gray-900 font-mono break-all flex-1">
+                                                    {coinbaseCharge.addresses[selectedNetwork] || 'No address for this network'}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleCopy(coinbaseCharge.addresses[selectedNetwork] || '', 'wallet')}
+                                                    className="p-1.5 hover:bg-gray-100 rounded transition-colors shrink-0"
+                                                >
+                                                    {copied === 'wallet' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                                            <span className="text-sm text-gray-500">Amount</span>
+                                            <span className="text-sm font-bold text-gray-900">
+                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalAmount)} {currency}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Open in Coinbase */}
+                                    <a
+                                        href={coinbaseCharge.hostedUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2 w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        Open in Coinbase Commerce
+                                    </a>
+
+                                    <div className="bg-purple-50 border border-purple-100 rounded-lg p-3">
+                                        <p className="text-xs text-purple-700">
+                                            <strong>Coinbase Commerce:</strong> Send exactly <strong>{new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(totalAmount)} {currency}</strong> to the address above. Transactions are typically confirmed within 5-15 minutes.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
                 <div className="px-6 pb-6">
-                    {!timerStarted ? (
+                    {activeTab === 'bank' && !timerStarted ? (
                         <button
                             onClick={handleStartDeposit}
                             className="w-full py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
                         >
                             Start Deposit ({formatTime(DEPOSIT_TIMEOUT_MINUTES * 60)} window)
                         </button>
-                    ) : timerStarted && !isExpired && receiptFile && activeTab === 'bank' ? (
+                    ) : activeTab === 'bank' && timerStarted && !isExpired && receiptFile ? (
                         <button
                             onClick={handleCompleteDeposit}
                             disabled={isSubmitting}
@@ -480,14 +593,21 @@ export default function DepositModal({ isOpen, onClose, amount, currency, dealId
                                 </>
                             )}
                         </button>
-                    ) : (
+                    ) : activeTab === 'crypto' && coinbaseCharge ? (
+                        <button
+                            onClick={onClose}
+                            className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                        >
+                            I've Sent the Payment
+                        </button>
+                    ) : activeTab === 'bank' ? (
                         <button
                             onClick={onClose}
                             className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
                         >
                             Close
                         </button>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>
