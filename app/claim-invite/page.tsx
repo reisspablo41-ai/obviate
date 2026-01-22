@@ -11,7 +11,10 @@ export default async function ClaimInvitePage({
     const token = (await searchParams).token
     const supabase = await createClient()
 
+    console.log('[ClaimInvite] processing token:', token)
+
     if (!token) {
+        // ... existing invalid token UI
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
                 <div className="bg-white p-8 rounded-xl shadow border max-w-md w-full text-center">
@@ -25,13 +28,13 @@ export default async function ClaimInvitePage({
     }
 
     // 1. Fetch Invitation
-    const { data: invite } = await supabase
-        .from('deal_invitations')
-        .select('*, deal:deals(*)')
-        .eq('token', token)
-        .single()
+    const { data: invite, error } = await supabase.rpc('get_invite_details_by_token', {
+        p_token: token
+    })
 
-    if (!invite) {
+    console.log('[ClaimInvite] RPC result:', { invite, error })
+
+    if (!invite || !invite.deal) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
                 <div className="bg-white p-8 rounded-xl shadow border max-w-md w-full text-center">
@@ -93,7 +96,7 @@ export default async function ClaimInvitePage({
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
                     <h3 className="font-medium text-gray-900 mb-2">Deal Summary</h3>
                     <p className="text-sm text-gray-500">Title: {invite.deal.title}</p>
-                    <p className="text-sm text-gray-500">From: {invite.email}</p>
+                    <p className="text-sm text-gray-500">From: {invite.initiator?.full_name || invite.initiator?.email || invite.email}</p>
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -119,17 +122,25 @@ export default async function ClaimInvitePage({
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        // Update Deal: Set recipient_id, set status to active/funding
-        await supabase.from('deals').update({
-            recipient_id: user.id,
-            status: 'active' // or 'funding' depending on flow. Let's say active means agreed.
-        }).eq('id', invite.deal_id)
+        console.log('[ClaimInvite] accepting deal with params:', {
+            p_deal_id: invite.deal_id,
+            p_invite_id: invite.id,
+            p_user_id: user.id
+        })
 
-        // Update Invite: Mark accepted
-        await supabase.from('deal_invitations').update({
-            accepted: true,
-            accepted_at: new Date().toISOString()
-        }).eq('id', invite.id)
+        // Use secure RPC to accept deal (updates deal status/recipient and invite accepted status)
+        const { data: result, error: rpcError } = await supabase.rpc('accept_deal_securely', {
+            p_deal_id: invite.deal_id,
+            p_invite_id: invite.id,
+            p_user_id: user.id
+        })
+
+        console.log('[ClaimInvite] RPC result:', { result, rpcError })
+
+        if (rpcError || (result && !result.success)) {
+            console.error('[ClaimInvite] Error accepting deal:', rpcError || result)
+            return // Handle error appropriately in UI if needed
+        }
 
         redirect(`/deals/${invite.deal_id}`)
     }

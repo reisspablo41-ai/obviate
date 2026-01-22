@@ -12,15 +12,17 @@ export default async function DashboardPage() {
     }
 
     // Parallel Data Fetching
-    const [kycRes, dealsRes, disputesRes] = await Promise.all([
+    const [kycRes, dealsRes, disputesRes, invitesRes] = await Promise.all([
         supabase.from('kyc_verifications').select('status').eq('user_id', user.id).single(),
-        supabase.from('deals').select('*').or(`initiator_id.eq.${user.id},recipient_id.eq.${user.id}`).order('updated_at', { ascending: false }),
-        supabase.from('disputes').select('*').eq('opened_by', user.id).eq('status', 'open')
+        supabase.from('deals').select('*, initiator:profiles!initiator_id(*), recipient:profiles!recipient_id(*)').or(`initiator_id.eq.${user.id},recipient_id.eq.${user.id}`).order('updated_at', { ascending: false }),
+        supabase.from('disputes').select('*').eq('opened_by', user.id).eq('status', 'open'),
+        supabase.rpc('get_user_pending_invites', { p_email: user.email })
     ]);
 
     const kycStatus = kycRes.data?.status || 'not_started';
-    const deals = dealsRes.data || [];
+    const deals = (dealsRes.data || []) as any[];
     const openDisputes = disputesRes.data || [];
+    const pendingInvites = (invitesRes.data || []) as any[]; // RPC returns the correct shape directly
 
     // Calculate Stats
     const activeDeals = deals.filter(d => ['active', 'funding', 'funded', 'in_review', 'disputed'].includes(d.status));
@@ -38,7 +40,8 @@ export default async function DashboardPage() {
 
     const totalFunds = lockedFunds + availableFunds;
 
-    const actionRequiredCount = (kycStatus !== 'verified' ? 1 : 0) + openDisputes.length;
+    // Count Action Items
+    const actionRequiredCount = (kycStatus !== 'verified' ? 1 : 0) + openDisputes.length + pendingInvites.length;
 
     return (
         <div className="space-y-8">
@@ -64,6 +67,39 @@ export default async function DashboardPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* Pending Invitations Alert */}
+            {pendingInvites.length > 0 && (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-emerald-900 mb-4 flex items-center gap-2">
+                        <Loader2 className="w-5 h-5 text-emerald-600 animate-spin-slow" />
+                        Pending Invitations ({pendingInvites.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {pendingInvites.map((invite) => (
+                            <div key={invite.id} className="bg-white p-4 rounded-lg shadow-sm border border-emerald-100 flex flex-col justify-between h-full">
+                                <div>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-bold text-gray-900 line-clamp-1">{invite.deal?.title}</h4>
+                                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                            {invite.deal.currency} {invite.deal.amount}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                                        From: <span className="font-medium text-gray-700">{invite.deal?.initiator?.full_name || invite.deal?.initiator?.email || 'Unknown User'}</span>
+                                    </p>
+                                </div>
+                                <Link
+                                    href={`/claim-invite?token=${invite.token}`}
+                                    className="mt-2 w-full py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors text-center block"
+                                >
+                                    View & Accept
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Quick Stats & Chart Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -110,6 +146,7 @@ export default async function DashboardPage() {
                             <p className="text-sm font-medium text-gray-500">Action Required</p>
                             <p className="text-2xl font-bold text-gray-900">{actionRequiredCount}</p>
                             {kycStatus !== 'verified' && <p className="text-xs text-amber-600 mt-1 font-medium">Verify Identity</p>}
+                            {pendingInvites.length > 0 && <p className="text-xs text-emerald-600 mt-1 font-medium">{pendingInvites.length} Pending Invite(s)</p>}
                             {openDisputes.length > 0 && <p className="text-xs text-red-600 mt-1 font-medium">{openDisputes.length} Open Dispute(s)</p>}
                         </div>
                     </div>

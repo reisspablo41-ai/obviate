@@ -34,27 +34,17 @@ export default async function DealsPage() {
         .order('created_at', { ascending: false });
 
     // 3. Fetch Received Invitations (Where email matches mine)
-    const { data: receivedInvitations, error: inviteError } = await supabase
-        .from('deal_invitations')
-        .select(`
-            *,
-            deals (
-                title,
-                amount,
-                currency,
-                initiator_id,
-                initiator:profiles!initiator_id(full_name)
-            )
-        `)
-        .ilike('email', user.email || '') // Case-insensitive match
-        .order('created_at', { ascending: false });
+    // 3. Fetch Received Invitations (Secure RPC)
+    const { data: receivedInvitations, error: inviteError } = await supabase.rpc('get_user_pending_invites', {
+        p_email: user.email
+    })
 
     if (inviteError) {
         console.error('CRITICAL: Error fetching received invitations:', inviteError);
     }
 
     // Debug logs re-added for troubleshooting
-    console.log('--- DEBUG DASHBOARD ---');
+    console.log('--- DEBUG DEALS ---');
     console.log('Current User:', user.email);
     console.log('Received Invites Data:', receivedInvitations);
 
@@ -87,34 +77,25 @@ export default async function DealsPage() {
                         Received Invitations
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {receivedInvitations.map((invite) => (
-                            <div key={invite.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-emerald-200 transition-colors">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                                        <Mail className="w-5 h-5" />
+                        {receivedInvitations.map((invite: any) => (
+                            <div key={invite.id} className="bg-white p-4 rounded-lg shadow-sm border border-emerald-100 flex flex-col justify-between h-full">
+                                <div>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-bold text-gray-900 line-clamp-1">{invite.deal?.title}</h4>
+                                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                            {invite.deal.currency} {invite.deal.amount}
+                                        </span>
                                     </div>
-                                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${invite.accepted ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-emerald-700'
-                                        }`}>
-                                        {invite.accepted ? 'Accepted' : 'Pending Action'}
-                                    </span>
+                                    <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                                        From: <span className="font-medium text-gray-700">{invite.deal?.initiator?.full_name || invite.deal?.initiator?.email || 'Unknown User'}</span>
+                                    </p>
                                 </div>
-                                <h3 className="font-medium text-gray-900 mb-1">{(invite.deals as any)?.title}</h3>
-                                <p className="text-sm text-gray-500 mb-4">
-                                    From: {(invite.deals as any)?.initiator?.full_name || 'Unknown User'}
-                                </p>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="font-semibold text-gray-900">
-                                        {(invite.deals as any)?.currency} {(invite.deals as any)?.amount}
-                                    </span>
-                                    {!invite.accepted && (
-                                        <Link
-                                            href={`/claim-invite?token=${invite.token}`}
-                                            className="text-emerald-600 font-medium hover:underline flex items-center gap-1"
-                                        >
-                                            View & Accept <ArrowRight className="w-4 h-4" />
-                                        </Link>
-                                    )}
-                                </div>
+                                <Link
+                                    href={`/claim-invite?token=${invite.token}`}
+                                    className="mt-2 w-full py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors text-center block"
+                                >
+                                    View & Accept
+                                </Link>
                             </div>
                         ))}
                     </div>
