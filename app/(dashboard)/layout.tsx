@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Home, Briefcase, Wallet, LogOut, PlusCircle, ShieldCheck, LifeBuoy } from 'lucide-react';
 import { ToastProvider } from '@/hooks/use-toast';
+import DashboardMobileMenu from '@/components/dashboard/DashboardMobileMenu';
 
 export default function DashboardLayout({
     children,
@@ -74,13 +75,12 @@ export default function DashboardLayout({
 
                 {/* Main Content */}
                 <main className="flex-1 overflow-y-auto">
-                    {/* Mobile Header (TODO: Add functionality) */}
+                    {/* Mobile Header */}
                     <header className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
                         <Link href="/" className="text-xl font-bold text-emerald-600">
                             EscrowApp
                         </Link>
-                        {/* Burger menu placeholder */}
-                        <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                        <DashboardMobileMenu />
                     </header>
 
                     <div className="p-6 md:p-10 max-w-7xl mx-auto">

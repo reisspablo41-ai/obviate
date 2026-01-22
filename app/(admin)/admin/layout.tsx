@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { LayoutDashboard, AlertTriangle, FileText, LogOut, Users, ShieldCheck, Mail } from 'lucide-react';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import AdminMobileMenu from '@/components/admin/AdminMobileMenu';
 
 export default async function AdminLayout({
     children,
@@ -107,8 +108,7 @@ export default async function AdminLayout({
                     <Link href="/admin" className="text-xl font-bold text-emerald-500">
                         Escrow Admin
                     </Link>
-                    {/* Burger menu placeholder */}
-                    <div className="w-6 h-6 bg-gray-800 rounded"></div>
+                    <AdminMobileMenu />
                 </header>
 
                 <div className="p-6 md:p-10 max-w-7xl mx-auto">
